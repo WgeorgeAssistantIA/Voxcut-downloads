@@ -1,0 +1,69 @@
+name: voxcut
+title: VoxCut
+base: core24
+version: '1.5.2'
+license: Proprietary
+contact: george.william@hotmail.fr
+website: https://voxcutpro.com
+summary: Automatically remove silences from audio and video
+description: |
+  VoxCut detects and automatically cuts the silent parts from your podcasts,
+  interviews, recordings and training videos — in one click.
+
+  100% local: your files never leave your computer. No cloud, no subscription.
+  FFmpeg is bundled, so there is nothing else to install.
+
+grade: stable
+confinement: strict
+compression: lzo
+
+platforms:
+  amd64:
+    build-on: amd64
+    build-for: amd64
+
+apps:
+  voxcut:
+    command: bin/voxcut
+    extensions: [gnome]
+    plugs:
+      - home
+      - removable-media
+      - audio-playback
+      - network
+      - opengl
+    environment:
+      # Police emoji embarquée (carrés "▢" sinon, cf. AppImage)
+      XDG_DATA_DIRS: $SNAP/usr/share:$XDG_DATA_DIRS
+
+parts:
+  # Bundle PyInstaller (onedir) récupéré depuis la release GitHub officielle.
+  voxcut:
+    plugin: dump
+    source: https://github.com/WgeorgeAssistantIA/voxcut-downloads/releases/download/v1.5.2/VoxCut-linux-x64.tar.gz
+    source-type: tar
+    organize:
+      VoxCut/: opt/voxcut/
+    stage-packages:
+      # Libs X11/rendu dont Tk a besoin et que PyInstaller n'embarque pas toujours
+      - libx11-6
+      - libxext6
+      - libxrender1
+      - libxft2
+      - libxcb1
+      - libfontconfig1
+      - libfreetype6
+
+  # Lanceur : pointe vers l'exécutable décompressé
+  launcher:
+    plugin: dump
+    source: launcher
+    organize:
+      voxcut.sh: bin/voxcut
+
+  # Police emoji embarquée (l'icône + .desktop sont dans snap/gui/, copiés auto)
+  assets:
+    plugin: dump
+    source: assets
+    organize:
+      NotoColorEmoji.ttf: usr/share/fonts/truetype/noto/NotoColorEmoji.ttf
